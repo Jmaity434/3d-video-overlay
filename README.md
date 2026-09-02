@@ -27,6 +27,16 @@ The names have different roles:
 - Video path validation before Panda3D creates a graphics window.
 - Logging and clear runtime errors for video-stream failures.
 
+## Library Documentation
+
+Detailed product and engineering documentation is available in [`docs/`](docs/README.md):
+
+- [PRD](docs/PRD.md): product requirements, users, goals, and acceptance criteria.
+- [TRD](docs/TRD.md): technical requirements, runtime contracts, and constraints.
+- [ADD](docs/ADD.md): architecture, scene graph, lifecycle, and design decisions.
+- [API Reference](docs/API.md): public functions, engine behavior, helpers, and controls.
+- [CI/CD and Distribution Plan](docs/CICD-DISTRIBUTION.md): CI, releases, and PyPI strategy.
+
 ## Requirements
 
 - Python 3.8 or newer.
