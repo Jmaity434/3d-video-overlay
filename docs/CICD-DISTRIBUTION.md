@@ -26,7 +26,7 @@ Each matrix job:
 
 The `--no-deps` choice keeps the current tests lightweight and headless. The
 tests validate package metadata and path behavior; they do not create a
-Panda3D window or decode a real movie.
+Panda3D, Pygame, or ModernGL window or decode a real movie.
 
 ## 3. CI Quality Gates
 

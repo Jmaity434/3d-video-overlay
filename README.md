@@ -27,6 +27,11 @@ The names have different roles:
 - Video path validation before Panda3D creates a graphics window.
 - Logging and clear runtime errors for video-stream failures.
 
+This repository includes three selectable rendering backends using five
+libraries: Panda3D, Pygame, PyOpenGL, OpenCV, and ModernGL. See the full
+[five-library comparison](docs/LIBRARY-COMPARISON.md). No AI integration is
+included.
+
 ## Library Documentation
 
 Detailed product and engineering documentation is available in [`docs/`](docs/README.md):
@@ -36,11 +41,17 @@ Detailed product and engineering documentation is available in [`docs/`](docs/RE
 - [ADD](docs/ADD.md): architecture, scene graph, lifecycle, and design decisions.
 - [API Reference](docs/API.md): public functions, engine behavior, helpers, and controls.
 - [CI/CD and Distribution Plan](docs/CICD-DISTRIBUTION.md): CI, releases, and PyPI strategy.
+- [Five-Library Comparison](docs/LIBRARY-COMPARISON.md): backend roles, trade-offs, and selection guide.
 
 ## Requirements
 
 - Python 3.8 or newer.
-- Panda3D 1.10.14 or newer.
+- Panda3D 1.10.14 or newer for the primary 3D engine.
+- Pygame 2.5.0 or newer and PyOpenGL 3.1.7 or newer for the custom OpenGL
+  backend.
+- OpenCV 4.8.0 or newer and ModernGL 5.8.0 or newer for the computer-vision
+  backend.
+- ModernGL Window 2.4.0 or newer for the ModernGL native window integration.
 - A display-capable environment supported by Panda3D. A normal desktop
   session is recommended; the library does not configure an off-screen or
   headless renderer.
@@ -139,6 +150,32 @@ To use a model instead, pass its path as the second argument:
 play_video_with_3d_overlay("assets/demo.mp4", "assets/marker.egg")
 ```
 
+### Alternative Backend Samples
+
+The project also provides two selectable backends. Start only one backend per
+process because each backend owns its native graphics window.
+
+Pygame + PyOpenGL:
+
+```python
+from video3doverlay import play_video_with_pygame_opengl
+
+play_video_with_pygame_opengl("assets/demo.mp4")
+```
+
+OpenCV + ModernGL:
+
+```python
+from video3doverlay import play_video_with_opencv_moderngl
+
+play_video_with_opencv_moderngl("assets/demo.mp4")
+```
+
+The Pygame backend uses OpenCV for frames, PyOpenGL for rendering, and draws
+an interactive wireframe sphere. The ModernGL backend uses OpenCV for frames
+and classical motion detection, then displays the processed frame through
+ModernGL. No AI or model-file parser is included in either alternative.
+
 ### Headless Smoke Check
 
 The following command checks a video path without opening a graphics window:
@@ -224,6 +261,8 @@ if is_valid_video_path("assets/demo.mp4"):
 │   └── video3doverlay/
 │       ├── __init__.py   # Public exports and version
 │       ├── engine.py     # Panda3D engine and runtime controls
+│       ├── pygame_backend.py  # Pygame + PyOpenGL backend
+│       ├── opencv_backend.py  # OpenCV + ModernGL backend
 │       └── utils.py      # Video path validation
 ├── tests/
 │   └── test_engine.py    # Headless validation and API tests

@@ -151,7 +151,53 @@ pitch.
 
 ## 6. Import Behavior
 
-The package initializer exposes `Video3DOverlayEngine` and
-`play_video_with_3d_overlay` through module-level lazy attribute loading. This
-means importing `video3doverlay.utils` does not require importing Panda3D first.
-Requesting either engine export does require the declared Panda3D dependency.
+The package initializer exposes all backend classes and entry points through
+module-level lazy attribute loading. This means importing
+`video3doverlay.utils` does not require importing any graphics library first.
+Requesting a backend export imports only that backend module: Panda3D exports
+require Panda3D, Pygame exports require Pygame/PyOpenGL/OpenCV, and ModernGL
+exports require OpenCV/ModernGL/ModernGL Window.
+
+## 7. Alternative Backends
+
+The package exposes two independent runtime backends. Select one entry point
+per process; each backend owns its native window and render loop.
+
+### `PygameOpenGLEngine`
+
+```python
+class PygameOpenGLEngine:
+    def __init__(self, video_path: str, width: int = 1280, height: int = 720): ...
+    def run(self) -> None: ...
+```
+
+This backend uses Pygame for window and events, PyOpenGL for rendering, and
+OpenCV for video frame acquisition. It draws a wireframe sphere and supports
+WASD/arrow movement, `R`, mouse dragging, and `Escape` to exit.
+
+```python
+from video3doverlay import play_video_with_pygame_opengl
+
+play_video_with_pygame_opengl("assets/demo.mp4")
+```
+
+### `OpenCVModernGLEngine`
+
+```python
+class OpenCVModernGLEngine:
+    def __init__(self, video_path: str, width: int = 1280, height: int = 720): ...
+    def run(self) -> None: ...
+```
+
+This backend uses OpenCV to read frames and detect large moving regions with
+classical background subtraction. ModernGL uploads and displays the processed
+frames. `moderngl-window` provides the native window integration.
+
+```python
+from video3doverlay import play_video_with_opencv_moderngl
+
+play_video_with_opencv_moderngl("assets/demo.mp4")
+```
+
+Both alternatives raise `RuntimeError` when their dependencies are missing or
+the video cannot be opened. Neither backend uses AI.

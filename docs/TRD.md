@@ -11,10 +11,10 @@ engine and Hatchling as the build backend.
 | Area | Requirement |
 | --- | --- |
 | Python | `>=3.8` |
-| Graphics | `panda3d>=1.10.14` |
+| Graphics | `panda3d>=1.10.14`, `pygame>=2.5.0`, `PyOpenGL>=3.1.7`, `moderngl>=5.8.0` |
 | Display | A Panda3D-supported display-capable environment |
 | Input | Panda3D event messenger and mouse watcher |
-| Media | Local file with `.mp4`, `.avi`, or `.mkv` extension |
+| Media and CV | `opencv-python>=4.8.0`; local `.mp4`, `.avi`, or `.mkv` file |
 | Build | PEP 517 build through Hatchling |
 
 The extension allowlist is a fast preflight check, not a codec compatibility

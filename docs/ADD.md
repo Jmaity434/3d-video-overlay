@@ -28,9 +28,9 @@ roots, asset loader, input messenger, and task manager.
 
 ### `__init__.py`
 
-Provides the version and top-level names. Panda3D-backed names are loaded
+Provides the version and top-level names. Graphics-backed names are loaded
 lazily so dependency-light validation utilities can be imported by tooling
-without constructing or importing the graphics engine.
+without importing a backend or constructing a graphics window.
 
 ### `utils.py`
 
@@ -47,6 +47,18 @@ Owns runtime orchestration:
 - Input event registration.
 - Animation and drag state.
 - Convenience entry point that starts `ShowBase.run()`.
+
+### `pygame_backend.py`
+
+Uses Pygame for window and event management, PyOpenGL for rendering, and
+OpenCV for video frames. It is a lower-level alternative to the Panda3D scene
+graph and draws a wireframe sphere as its interactive shape.
+
+### `opencv_backend.py`
+
+Uses OpenCV for video acquisition and classical motion detection, then
+ModernGL for GPU texture upload and presentation. `moderngl-window` supplies
+the native window integration required by ModernGL.
 
 ## 3. Scene Graph Design
 
@@ -120,6 +132,9 @@ The engine does not own:
 - Asset downloading.
 - Application-specific UI or persistence.
 - A multi-window or embedded-renderer policy.
+
+The three backends are alternatives. A host application should select one
+entry point for a process rather than combining their native window loops.
 
 Those concerns should be implemented by a host application or a future
 higher-level package layer.
