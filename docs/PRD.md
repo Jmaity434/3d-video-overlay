@@ -41,6 +41,8 @@ in one real-time process.
 - Load an optional model with Panda3D's loader.
 - Render a cyan wireframe fallback when a model is absent or fails to load.
 - Provide automatic rotation and simple keyboard/mouse interaction.
+- Provide opt-in classical motion tracking that aligns the overlay to moving
+  video content without AI.
 - Expose a small top-level API that is easy to discover.
 - Provide headless validation tests and GitHub Actions verification.
 
@@ -57,8 +59,8 @@ in one real-time process.
 ## 5. Non-goals
 
 - Editing, transcoding, exporting, or permanently compositing video.
-- Computer-vision tracking of people, markers, or camera motion.
-- Automatic alignment of 3D objects with features in a video.
+- Semantic recognition of people or markers, and camera-pose estimation.
+- Calibrated 3D alignment of models with arbitrary video features.
 - A complete media player UI.
 - A guarantee that every codec accepted by a file extension is supported by
   the installed Panda3D build.
@@ -105,6 +107,7 @@ intermediate video or designing a complete rendering loop.
 | FR-08 | Keyboard | Arrow keys and `WASD` translate on X/Z |
 | FR-09 | Mouse | Primary-button drag changes heading and pitch |
 | FR-10 | Reset | `R` restores position and rotation |
+| FR-11 | Tracking | Optional OpenCV motion alignment updates overlay X/Z and scale |
 
 ## 9. Quality Requirements
 

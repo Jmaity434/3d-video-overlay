@@ -26,6 +26,8 @@ The names have different roles:
 - Mouse-drag heading and pitch control.
 - Video path validation before Panda3D creates a graphics window.
 - Logging and clear runtime errors for video-stream failures.
+- Optional classical OpenCV motion tracking that aligns the overlay to the
+  largest moving region in the video.
 
 This repository includes three selectable rendering backends using five
 libraries: Panda3D, Pygame, PyOpenGL, OpenCV, and ModernGL. See the full
@@ -91,6 +93,7 @@ from video3doverlay import play_video_with_3d_overlay
 play_video_with_3d_overlay(
     video_path="assets/demo.mp4",
     model_path="assets/marker.egg",
+  tracking_enabled=True,
 )
 ```
 
@@ -105,6 +108,12 @@ play_video_with_3d_overlay("assets/demo.mp4")
 The call validates the video path, constructs `Video3DOverlayEngine`, and
 blocks in Panda3D's `run()` loop. The video card fills the `render2d` frame and
 the 3D object is placed at `(x=0, y=8, z=0)` in the 3D scene.
+
+Set `tracking_enabled=True` to open a parallel OpenCV video stream. The
+tracker uses background subtraction, selects the largest moving region, maps
+its center to the overlay's X/Z position, and adjusts the overlay scale. This
+is classical computer vision, not AI. It is a screen-space motion alignment,
+not camera calibration or true 3D pose estimation.
 
 ### Runnable Copy-and-Paste Sample
 

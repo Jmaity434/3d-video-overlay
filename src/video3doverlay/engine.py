@@ -1,7 +1,7 @@
 """Panda3D runtime for a video-backed 3D overlay."""
 
 import logging
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
@@ -15,17 +15,26 @@ LOGGER = logging.getLogger(__name__)
 class Video3DOverlayEngine(ShowBase):
     """Display a video on a 2D card while rendering an interactive 3D object."""
 
-    def __init__(self, video_path: str, model_path: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        video_path: str,
+        model_path: Optional[str] = None,
+        tracking_enabled: bool = False,
+    ) -> None:
         validated_video_path = validate_video_path(video_path)
         super().__init__()
         self.disableMouse()
         self._video_path = validated_video_path
         self._model_path = model_path
+        self._tracking_enabled = tracking_enabled
+        self._tracker: Optional[Any] = None
         self.overlay: NodePath = NodePath()
         self._last_mouse: Optional[Tuple[float, float]] = None
         self._video_texture: Optional[MovieTexture] = None
         self._setup_video_background()
         self._setup_overlay()
+        if tracking_enabled:
+            self._setup_tracker()
         self._bind_controls()
         self.taskMgr.add(self._animate_overlay, "video3doverlay-animation")
 
@@ -78,6 +87,27 @@ class Video3DOverlayEngine(ShowBase):
         self.overlay.setPos(0.0, 8.0, 0.0)
         self.overlay.setScale(1.5)
 
+    def _setup_tracker(self) -> None:
+        """Create the optional classical OpenCV motion tracker."""
+        try:
+            import cv2
+
+            tracker = cv2.VideoCapture(str(self._video_path))
+            if not tracker.isOpened():
+                raise RuntimeError("OpenCV could not open the tracking stream")
+            self._tracker = {
+                "capture": tracker,
+                "detector": cv2.createBackgroundSubtractorMOG2(
+                    history=120, varThreshold=32, detectShadows=False
+                ),
+                "cv2": cv2,
+            }
+        except Exception as error:
+            LOGGER.exception("Unable to enable tracking for '%s'", self._video_path)
+            raise RuntimeError(
+                "Tracking requires a working OpenCV installation and video stream"
+            ) from error
+
     def _create_wireframe_box(self) -> NodePath:
         lines = LineSegs("overlay-fallback")
         lines.setThickness(3.0)
@@ -128,6 +158,8 @@ class Video3DOverlayEngine(ShowBase):
         return float(mouse.x), float(mouse.y)
 
     def _animate_overlay(self, task: Task) -> str:
+        if self._tracker is not None:
+            self._update_tracking()
         current = self._read_mouse()
         if self._last_mouse is not None and current is not None:
             delta_x = current[0] - self._last_mouse[0]
@@ -139,9 +171,45 @@ class Video3DOverlayEngine(ShowBase):
             self.overlay.setH(task.time * 30.0)
         return Task.cont
 
+    def _update_tracking(self) -> None:
+        """Map the largest moving region from video pixels to world coordinates."""
+        tracker = self._tracker
+        if tracker is None:
+            return
+        capture = tracker["capture"]
+        cv2 = tracker["cv2"]
+        success, frame = capture.read()
+        if not success:
+            capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            return
 
-def play_video_with_3d_overlay(video_path: str, model_path: Optional[str] = None) -> None:
+        mask = tracker["detector"].apply(frame)
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        candidates = [contour for contour in contours if cv2.contourArea(contour) >= 500.0]
+        if not candidates:
+            return
+        x, y, width, height = cv2.boundingRect(max(candidates, key=cv2.contourArea))
+        frame_height, frame_width = frame.shape[:2]
+        center_x = (x + width / 2.0) / frame_width
+        center_y = (y + height / 2.0) / frame_height
+        self.overlay.setX((center_x - 0.5) * 8.0)
+        self.overlay.setZ((0.5 - center_y) * 6.0)
+        self.overlay.setScale(max(0.25, min(3.0, width / float(frame_width) * 4.0)))
+
+    def destroy(self) -> None:
+        """Release the optional tracking stream before closing Panda3D."""
+        if self._tracker is not None:
+            self._tracker["capture"].release()
+            self._tracker = None
+        super().destroy()
+
+
+def play_video_with_3d_overlay(
+    video_path: str,
+    model_path: Optional[str] = None,
+    tracking_enabled: bool = False,
+) -> None:
     """Validate assets, create the engine, and enter Panda3D's main loop."""
     validate_video_path(video_path)
-    app = Video3DOverlayEngine(video_path, model_path)
+    app = Video3DOverlayEngine(video_path, model_path, tracking_enabled)
     app.run()

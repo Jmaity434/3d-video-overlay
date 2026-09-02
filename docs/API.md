@@ -24,6 +24,7 @@ The repository is `3d-video-overlay`; the distribution and import name is
 def play_video_with_3d_overlay(
     video_path: str,
     model_path: Optional[str] = None,
+    tracking_enabled: bool = False,
 ) -> None:
     ...
 ```
@@ -33,6 +34,8 @@ def play_video_with_3d_overlay(
 - `video_path`: Local path to an existing `.mp4`, `.avi`, or `.mkv` file.
 - `model_path`: Optional path accepted by Panda3D's `loader.loadModel()`.
   Invalid or missing models are replaced by the procedural wireframe.
+- `tracking_enabled`: When `True`, use OpenCV background subtraction to align
+    overlay position and scale to the largest moving region. Defaults to `False`.
 
 #### Behavior
 
@@ -55,6 +58,12 @@ from video3doverlay import play_video_with_3d_overlay
 play_video_with_3d_overlay("assets/demo.mp4")
 ```
 
+Tracking example:
+
+```python
+play_video_with_3d_overlay("assets/demo.mp4", tracking_enabled=True)
+```
+
 ## 3. Engine Class
 
 ### `Video3DOverlayEngine`
@@ -65,6 +74,7 @@ class Video3DOverlayEngine(ShowBase):
         self,
         video_path: str,
         model_path: Optional[str] = None,
+        tracking_enabled: bool = False,
     ) -> None:
         ...
 ```
@@ -85,6 +95,8 @@ runtime setup during construction.
 - Synchronizes audio when the movie exposes a sound stream.
 - Places the overlay at `(0.0, 8.0, 0.0)` and scale `1.5`.
 - Registers keyboard, mouse, and animation-task behavior.
+- When enabled, opens a second OpenCV stream and aligns the overlay to the
+    largest moving region using classical background subtraction.
 
 #### Direct-use example
 

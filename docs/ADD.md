@@ -120,15 +120,15 @@ to diagnose.
 ### Lazy public engine import
 
 The package initializer exposes the documented engine names while deferring
-the Panda3D import until those names are requested. This preserves a useful
-headless path for `video3doverlay.utils` and packaging tools.
+graphics imports until the corresponding backend is requested. This preserves
+a useful headless path for `video3doverlay.utils` and packaging tools.
 
 ## 6. Operational Boundaries
 
 The engine does not own:
 
 - Video transcoding or media conversion.
-- Computer vision, calibration, or tracking.
+- Camera calibration, semantic recognition, or camera-pose estimation.
 - Asset downloading.
 - Application-specific UI or persistence.
 - A multi-window or embedded-renderer policy.
@@ -138,6 +138,20 @@ entry point for a process rather than combining their native window loops.
 
 Those concerns should be implemented by a host application or a future
 higher-level package layer.
+
+## 7. Optional Alignment Pipeline
+
+The Panda3D engine can opt into a parallel OpenCV stream. A background
+subtractor creates a foreground mask, contours are filtered by area, and the
+largest remaining contour is treated as the moving target. Its normalized
+pixel center maps to Panda3D X/Z coordinates and its width maps to a bounded
+scale. The source video remains untouched.
+
+This is useful for simple demonstrations with one prominent moving subject. It
+does not identify semantic objects, estimate camera pose, or produce a
+calibrated 3D transform. The second decoder can drift from the MovieTexture
+stream on difficult media, so production camera alignment should use a shared
+timestamped frame source.
 
 ## 7. Extension Points
 

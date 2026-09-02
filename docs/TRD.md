@@ -96,6 +96,12 @@ The animation task returns `Task.cont` on every frame. It samples the mouse
 watcher while dragging and otherwise updates automatic heading using
 `task.time`.
 
+When tracking is enabled, a second OpenCV stream is read by the animation task.
+The largest contour above the area threshold is mapped from normalized frame
+coordinates to overlay X/Z coordinates, and its width determines a bounded
+overlay scale. This is intentionally a simple motion heuristic rather than
+camera calibration or AI-based object recognition.
+
 ## 8. Packaging Requirements
 
 `pyproject.toml` must:
@@ -103,7 +109,8 @@ watcher while dragging and otherwise updates automatic heading using
 - Use `hatchling.build` as the PEP 517 backend.
 - Declare distribution name `video3doverlay`.
 - Declare Python `>=3.8`.
-- Declare `panda3d>=1.10.14` as a runtime dependency.
+- Declare Panda3D, Pygame, PyOpenGL, OpenCV, ModernGL, and ModernGL Window as
+   runtime dependencies.
 - Point Hatchling at `src/video3doverlay`.
 
 The source layout must remain installable with:
