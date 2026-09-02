@@ -1,10 +1,19 @@
-# video3doverlay
+# 3d-video-overlay
 
 [![CI](https://github.com/Jmaity434/3d-video-overlay/actions/workflows/ci.yml/badge.svg)](https://github.com/Jmaity434/3d-video-overlay/actions/workflows/ci.yml)
 
-`video3doverlay` is a Python library that displays a live 2D video background
-with an interactive Panda3D 3D overlay. The video is decoded at runtime and
-is not converted, re-encoded, or exported to another video file.
+`3d-video-overlay` is the GitHub repository for `video3doverlay`, a Python
+library that displays a live 2D video background with an interactive Panda3D
+3D overlay. The video is decoded at runtime and is not converted, re-encoded,
+or exported to another video file.
+
+The names have different roles:
+
+- **Repository name:** `3d-video-overlay` (this GitHub project).
+- **Python distribution name:** `video3doverlay` (the name used by packaging
+  tools).
+- **Python import name:** `video3doverlay` (the name used in `import`
+  statements).
 
 ## Features
 
@@ -30,15 +39,24 @@ is not converted, re-encoded, or exported to another video file.
 
 ## Installation
 
-Install directly from this repository while developing:
+### Install from GitHub
+
+Clone your repository and install the library in editable mode:
 
 ```bash
+git clone https://github.com/Jmaity434/3d-video-overlay.git
+cd 3d-video-overlay
 python -m pip install -e .
 ```
 
-The package declares Panda3D as a runtime dependency, so a regular install
-will install it as well. If you are installing from a local checkout and want
-to install test tools too:
+The package declares Panda3D as a runtime dependency, so this command installs
+Panda3D as well. You can also install the package directly without cloning it:
+
+```bash
+python -m pip install "git+https://github.com/Jmaity434/3d-video-overlay.git"
+```
+
+To install from an existing local checkout with the test tools:
 
 ```bash
 python -m pip install -e . pytest
@@ -67,9 +85,10 @@ The call validates the video path, constructs `Video3DOverlayEngine`, and
 blocks in Panda3D's `run()` loop. The video card fills the `render2d` frame and
 the 3D object is placed at `(x=0, y=8, z=0)` in the 3D scene.
 
-### Runnable Sample
+### Runnable Copy-and-Paste Sample
 
-Create a file named `run_overlay.py` in the repository root:
+After cloning the repository, create a file named `run_overlay.py` in the
+repository root and paste this code into it:
 
 ```python
 import logging
@@ -84,6 +103,8 @@ play_video_with_3d_overlay("assets/demo.mp4")
 Put a supported video at `assets/demo.mp4`, install the package, and run:
 
 ```bash
+mkdir -p assets
+# Copy your own .mp4, .avi, or .mkv file to assets/demo.mp4.
 python -m pip install -e .
 python run_overlay.py
 ```
@@ -99,6 +120,8 @@ Expected result:
 - There is normally no success message in the terminal; the visible result is
   the Panda3D window. Invalid or unreadable video files produce a logged error
   and a `RuntimeError`.
+
+Press `Ctrl+C` in the terminal or close the Panda3D window to stop the sample.
 
 To use a model instead, pass its path as the second argument:
 
