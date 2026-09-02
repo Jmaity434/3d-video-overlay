@@ -67,6 +67,63 @@ The call validates the video path, constructs `Video3DOverlayEngine`, and
 blocks in Panda3D's `run()` loop. The video card fills the `render2d` frame and
 the 3D object is placed at `(x=0, y=8, z=0)` in the 3D scene.
 
+### Runnable Sample
+
+Create a file named `run_overlay.py` in the repository root:
+
+```python
+import logging
+
+from video3doverlay import play_video_with_3d_overlay
+
+logging.basicConfig(level=logging.INFO)
+
+play_video_with_3d_overlay("assets/demo.mp4")
+```
+
+Put a supported video at `assets/demo.mp4`, install the package, and run:
+
+```bash
+python -m pip install -e .
+python run_overlay.py
+```
+
+Expected result:
+
+- A Panda3D window opens with the video filling the background.
+- A cyan wireframe box appears in the center because this sample does not
+  provide a model.
+- The box rotates automatically while the video continues playing.
+- Arrow keys or `WASD` move the box, `R` resets it, and primary-mouse dragging
+  changes its heading and pitch.
+- There is normally no success message in the terminal; the visible result is
+  the Panda3D window. Invalid or unreadable video files produce a logged error
+  and a `RuntimeError`.
+
+To use a model instead, pass its path as the second argument:
+
+```python
+play_video_with_3d_overlay("assets/demo.mp4", "assets/marker.egg")
+```
+
+### Headless Smoke Check
+
+The following command checks a video path without opening a graphics window:
+
+```bash
+PYTHONPATH=src python -c "from video3doverlay.utils import is_valid_video_path; print(is_valid_video_path('assets/demo.mp4'))"
+```
+
+For an existing supported file, it prints:
+
+```text
+True
+```
+
+For a missing file, it prints `False`. This check does not prove that the
+installed Panda3D build can decode the file; the full sample is the test for
+actual playback.
+
 ## Runtime Controls
 
 | Input | Behavior |
