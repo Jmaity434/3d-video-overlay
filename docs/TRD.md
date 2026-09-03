@@ -124,6 +124,12 @@ The source layout must remain installable with:
 python -m pip install -e .
 ```
 
+The base dependency is Panda3D. Pygame, OpenCV, ModernGL, and PyTorch are
+available through optional extras so web-adjacent or validation-only installs
+do not pay the cost of every backend. `camera_index` selects an OpenCV webcam
+instead of a file, and `output_path` creates parent directories and records
+processed MP4 frames.
+
 ## 9. Testability Requirements
 
 Tests should avoid constructing `ShowBase` unless a display-enabled integration

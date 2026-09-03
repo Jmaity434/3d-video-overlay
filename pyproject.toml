@@ -10,8 +10,27 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
 authors = [{ name = "Joy Maity" }]
-dependencies = [
-	"panda3d>=1.10.14",
+dependencies = ["panda3d>=1.10.14"]
+
+[project.optional-dependencies]
+pygame = [
+	"pygame>=2.5.0",
+	"PyOpenGL>=3.1.7",
+	"opencv-python>=4.8.0",
+]
+vision = [
+	"opencv-python>=4.8.0",
+	"moderngl>=5.8.0",
+	"moderngl-window>=2.4.0",
+]
+depth = [
+	"opencv-python>=4.8.0",
+	"moderngl>=5.8.0",
+	"moderngl-window>=2.4.0",
+	"torch>=2.0.0",
+	"torchvision>=0.15.0",
+]
+all = [
 	"pygame>=2.5.0",
 	"PyOpenGL>=3.1.7",
 	"opencv-python>=4.8.0",

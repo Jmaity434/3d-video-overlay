@@ -199,7 +199,8 @@ play_video_with_pygame_opengl("assets/demo.mp4")
 class OpenCVModernGLEngine:
     def __init__(self, video_path: str, width: int = 1280, height: int = 720,
                  depth_enabled: bool = False, depth_model: str = "MiDaS_small",
-                 device: Optional[str] = None): ...
+                 device: Optional[str] = None, camera_index: Optional[int] = None,
+                 output_path: Optional[str] = None): ...
     def run(self) -> None: ...
 ```
 
@@ -207,6 +208,8 @@ This backend uses OpenCV to read frames and detect large moving regions with
 classical background subtraction. ModernGL uploads and displays the processed
 frames. When `depth_enabled=True`, PyTorch runs the selected MiDaS model and a
 colored relative-depth visualization is blended into each frame.
+When `camera_index` is set, OpenCV reads that webcam instead of `video_path`.
+When `output_path` is set, processed frames are recorded as an MP4 stream.
 
 ```python
 from video3doverlay import play_video_with_opencv_moderngl
@@ -215,6 +218,20 @@ play_video_with_opencv_moderngl(
     "assets/demo.mp4", depth_enabled=True, device="cuda"
 )
 ```
+
+Webcam and recording example:
+
+```python
+play_video_with_opencv_moderngl(
+    "",
+    camera_index=0,
+    depth_enabled=True,
+    output_path="recordings/camera-processed.mp4",
+)
+```
+
+The recording contains OpenCV annotations and depth visualization. It does
+not capture Panda3D geometry because the backends use separate render contexts.
 
 ### `DepthEstimator`
 
@@ -233,6 +250,22 @@ width. The values are relative depth scores, not metric distances.
 `select_depth_device(device=None)` returns an explicit device unchanged, or
 automatically selects `cuda`/`cpu`; it returns `unavailable` if PyTorch is not
 installed.
+
+### `play_video_with_depth_overlay`
+
+```python
+def play_video_with_depth_overlay(
+    video_path: str,
+    depth_model: str = "MiDaS_small",
+    device: Optional[str] = None,
+    camera_index: Optional[int] = None,
+    output_path: Optional[str] = None,
+) -> None: ...
+```
+
+Runs the OpenCV + ModernGL backend with `depth_enabled=True`. Use
+`camera_index=0` for a default webcam, or provide a video path. Use
+`output_path` to record the processed frame stream.
 
 Both alternatives raise `RuntimeError` when their dependencies are missing or
 the video cannot be opened. Neither backend uses AI.

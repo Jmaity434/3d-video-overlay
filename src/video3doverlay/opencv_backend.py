@@ -1,5 +1,6 @@
 """OpenCV, PyTorch, and ModernGL backend for depth-aware video output."""
 
+from pathlib import Path
 from typing import Optional
 
 from .utils import validate_video_path
@@ -17,13 +18,22 @@ class OpenCVModernGLEngine:
         depth_enabled: bool = False,
         depth_model: str = "MiDaS_small",
         device: Optional[str] = None,
+        camera_index: Optional[int] = None,
+        output_path: Optional[str] = None,
     ) -> None:
-        self.video_path = validate_video_path(video_path)
+        if camera_index is not None:
+            if camera_index < 0:
+                raise ValueError("camera_index must be zero or greater")
+            self.video_path = camera_index
+        else:
+            self.video_path = validate_video_path(video_path)
         self.width = width
         self.height = height
         self.depth_enabled = depth_enabled
         self.depth_model = depth_model
         self.device = select_depth_device(device)
+        self.camera_index = camera_index
+        self.output_path = output_path
 
     def run(self) -> None:
         """Run the ModernGL backend using a GLFW window supplied by moderngl-window."""
@@ -37,10 +47,12 @@ class OpenCVModernGLEngine:
                 "moderngl-window"
             ) from error
 
-        capture = cv2.VideoCapture(str(self.video_path))
+        source = self.camera_index if self.camera_index is not None else str(self.video_path)
+        capture = cv2.VideoCapture(source)
         if not capture.isOpened():
             raise RuntimeError("OpenCV could not open video: {}".format(self.video_path))
         motion_detector = cv2.createBackgroundSubtractorMOG2()
+        writer = None
         depth_estimator = (
             DepthEstimator(self.depth_model, self.device)
             if self.depth_enabled
@@ -111,6 +123,21 @@ class OpenCVModernGLEngine:
                     frame = cv2.addWeighted(frame, 0.72, depth_image, 0.28, 0.0)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frame = cv2.resize(frame, (self.width, self.height))
+                if self.output_path and writer is None:
+                    output_path = Path(self.output_path).expanduser()
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    writer = cv2.VideoWriter(
+                        str(output_path),
+                        cv2.VideoWriter_fourcc(*"mp4v"),
+                        30.0,
+                        (self.width, self.height),
+                    )
+                    if not writer.isOpened():
+                        raise RuntimeError(
+                            "OpenCV could not create output video: {}".format(output_path)
+                        )
+                if writer is not None:
+                    writer.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
                 window_self.texture.write(frame.tobytes())
                 window_self.texture.use(0)
                 window_self.ctx.clear(0.02, 0.02, 0.02)
@@ -120,6 +147,8 @@ class OpenCVModernGLEngine:
             mglw.run_window_config(VideoWindow)
         finally:
             capture.release()
+            if writer is not None:
+                writer.release()
 
 
 def play_video_with_opencv_moderngl(
@@ -127,10 +156,13 @@ def play_video_with_opencv_moderngl(
     depth_enabled: bool = False,
     depth_model: str = "MiDaS_small",
     device: Optional[str] = None,
+    camera_index: Optional[int] = None,
+    output_path: Optional[str] = None,
 ) -> None:
     """Run the OpenCV + ModernGL backend."""
     OpenCVModernGLEngine(
-        video_path, depth_enabled=depth_enabled, depth_model=depth_model, device=device
+        video_path, depth_enabled=depth_enabled, depth_model=depth_model, device=device,
+        camera_index=camera_index, output_path=output_path,
     ).run()
 
 
@@ -138,8 +170,11 @@ def play_video_with_depth_overlay(
     video_path: str,
     depth_model: str = "MiDaS_small",
     device: Optional[str] = None,
+    camera_index: Optional[int] = None,
+    output_path: Optional[str] = None,
 ) -> None:
     """Run the OpenCV + ModernGL backend with PyTorch depth enabled."""
     play_video_with_opencv_moderngl(
-        video_path, depth_enabled=True, depth_model=depth_model, device=device
+        video_path, depth_enabled=True, depth_model=depth_model, device=device,
+        camera_index=camera_index, output_path=output_path,
     )

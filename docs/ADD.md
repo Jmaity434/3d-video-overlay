@@ -159,6 +159,18 @@ calibrated 3D transform. The second decoder can drift from the MovieTexture
 stream on difficult media, so production camera alignment should use a shared
 timestamped frame source.
 
+## 11. Live Camera and Recording
+
+The OpenCV + ModernGL backend accepts `camera_index` as an alternative to a
+file path. OpenCV then owns the live camera capture. If `output_path` is set,
+the backend writes the processed OpenCV frames to an MP4 `VideoWriter` while
+the same frames are displayed.
+
+This recording boundary is intentionally explicit: it records the processed
+camera stream, not a Panda3D framebuffer. Exact 3D composition capture should
+be added as a shared GPU compositor rather than attempting to combine three
+independent native render loops.
+
 ## 7. Extension Points
 
 Potential future extension points, in increasing scope:

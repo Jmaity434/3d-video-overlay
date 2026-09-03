@@ -29,8 +29,9 @@ The names have different roles:
 - Optional classical OpenCV motion tracking that aligns the overlay to the
   largest moving region in the video.
 
-This repository includes three selectable rendering backends using five
-libraries: Panda3D, Pygame, PyOpenGL, OpenCV, and ModernGL. See the full
+This repository includes three selectable rendering backends using seven
+libraries: Panda3D, Pygame, PyOpenGL, OpenCV, ModernGL, PyTorch, and
+torchvision. See the full
 [five-library comparison](docs/LIBRARY-COMPARISON.md). No AI integration is
 included.
 
@@ -75,7 +76,17 @@ python -m pip install -e .
 ```
 
 The package declares Panda3D as a runtime dependency, so this command installs
-Panda3D as well. You can also install the package directly without cloning it:
+Panda3D as well. The base install stays lightweight; install an optional extra
+only for the backend you need:
+
+```bash
+python -m pip install -e ".[pygame]"   # Pygame + PyOpenGL + OpenCV
+python -m pip install -e ".[vision]"   # OpenCV + ModernGL
+python -m pip install -e ".[depth]"    # OpenCV + ModernGL + PyTorch
+python -m pip install -e ".[all]"      # every backend and depth dependency
+```
+
+You can also install the base package directly without cloning it:
 
 ```bash
 python -m pip install "git+https://github.com/Jmaity434/3d-video-overlay.git"
@@ -217,6 +228,40 @@ play_video_with_depth_overlay("assets/demo.mp4", device="cuda")
 Omit `device` for automatic CUDA-or-CPU selection, or pass `device="cpu"` on
 machines without a compatible GPU.
 
+### Live Camera and Recording
+
+The OpenCV + ModernGL backend can use a webcam instead of a video file. The
+camera index is usually `0` for the default camera:
+
+```python
+from video3doverlay import play_video_with_depth_overlay
+
+play_video_with_depth_overlay(
+  video_path="",          # ignored when camera_index is provided
+  camera_index=0,
+  device="cuda",
+)
+```
+
+To record the processed camera frame stream while it is displayed:
+
+```python
+from video3doverlay import play_video_with_depth_overlay
+
+play_video_with_depth_overlay(
+  "",
+  camera_index=0,
+  output_path="recordings/camera-processed.mp4",
+)
+```
+
+The recording contains the processed camera frames, motion annotations, and
+optional depth visualization. It does not capture Panda3D geometry because
+Panda3D, Pygame, and ModernGL use separate native rendering contexts. A
+browser website cannot import this desktop Python GUI directly; use a
+server-side process and stream its frames to the browser with WebRTC or a
+similar lightweight transport.
+
 ### Headless Smoke Check
 
 The following command checks a video path without opening a graphics window:
@@ -335,8 +380,9 @@ Python 3.8 through 3.12 for pushes to `main` and pull requests.
 
 ## Limitations
 
-- This library provides a simple overlay scene, not camera tracking or
-  automatic alignment between a model and objects in the video.
+- This library provides a simple overlay scene, not camera-pose estimation.
+  OpenCV motion tracking can approximate alignment to the largest moving
+  region when enabled.
 - The overlay is positioned in Panda3D world coordinates; it is not projected
   from video metadata or detected features.
 - A file extension check does not guarantee that the file's codec is supported

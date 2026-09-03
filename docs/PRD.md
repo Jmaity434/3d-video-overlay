@@ -43,6 +43,7 @@ in one real-time process.
 - Provide automatic rotation and simple keyboard/mouse interaction.
 - Provide opt-in classical motion tracking that aligns the overlay to moving
   video content without AI.
+- Support a live OpenCV camera source and optional processed-frame recording.
 - Expose a small top-level API that is easy to discover.
 - Provide headless validation tests and GitHub Actions verification.
 
@@ -59,8 +60,9 @@ in one real-time process.
 ## 5. Non-goals
 
 - Editing, transcoding, exporting, or permanently compositing video.
-- Semantic recognition of people or markers, and camera-pose estimation.
-- Calibrated 3D alignment of models with arbitrary video features.
+- Semantic recognition of people or markers, and calibrated camera-pose
+  estimation.
+- Exact recording of a Panda3D 3D framebuffer from the alternative backend.
 - A complete media player UI.
 - A guarantee that every codec accepted by a file extension is supported by
   the installed Panda3D build.
@@ -108,6 +110,8 @@ intermediate video or designing a complete rendering loop.
 | FR-09 | Mouse | Primary-button drag changes heading and pitch |
 | FR-10 | Reset | `R` restores position and rotation |
 | FR-11 | Tracking | Optional OpenCV motion alignment updates overlay X/Z and scale |
+| FR-12 | Camera | OpenCV camera index can replace a video file |
+| FR-13 | Recording | Optional MP4 recording of processed OpenCV frames |
 
 ## 9. Quality Requirements
 
