@@ -26,7 +26,8 @@ Each matrix job:
 
 The `--no-deps` choice keeps the current tests lightweight and headless. The
 tests validate package metadata and path behavior; they do not create a
-Panda3D, Pygame, or ModernGL window or decode a real movie.
+Panda3D, Pygame, or ModernGL window, decode a real movie, or download PyTorch
+depth-model weights.
 
 ## 3. CI Quality Gates
 
@@ -40,6 +41,8 @@ Panda3D, Pygame, or ModernGL window or decode a real movie.
 ### Required before a stable release
 
 - Install and test with the declared Panda3D dependency.
+- Install the declared PyTorch/OpenCV dependencies and run a depth inference
+  smoke test with cached MiDaS weights.
 - Run a real-media smoke test using a controlled fixture.
 - Exercise model success and fallback paths.
 - Exercise the runtime in a supported display or controlled off-screen mode.
@@ -151,6 +154,8 @@ than storing a long-lived PyPI password in repository secrets.
 - Keep `.gitignore` covering Python caches and build outputs.
 - Verify the wheel contains `video3doverlay` under the expected package path.
 - Treat Panda3D as a runtime dependency even when headless unit tests skip it.
+- Treat PyTorch model weights as runtime data that must be cached or provisioned
+  separately; do not commit weights to the repository.
 
 ## 9. Observability and Failure Response
 
@@ -165,6 +170,7 @@ artifact should never be promoted from TestPyPI to PyPI.
 - [ ] README install and sample commands work from a clean checkout.
 - [ ] Unit and compile checks pass across the supported Python matrix.
 - [ ] Panda3D runtime smoke test passes on the supported target platform.
+- [ ] MiDaS depth inference passes on a supported CPU and recommended CUDA GPU.
 - [ ] sdist and wheel metadata are correct.
 - [ ] License is included in source distribution and documented.
 - [ ] Git tag matches the package version.

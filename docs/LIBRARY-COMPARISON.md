@@ -1,9 +1,10 @@
 # Five-Library Comparison
 
-This project uses five library packages across three rendering approaches. AI
-is not used by any backend. `Panda3D`, `Pygame`, `PyOpenGL`, `OpenCV`, and
-`ModernGL` are ordinary runtime libraries; the OpenCV backend uses classical
-motion detection with `createBackgroundSubtractorMOG2`.
+This project uses seven runtime packages across three rendering approaches.
+The five core libraries are `Panda3D`, `Pygame`, `PyOpenGL`, `OpenCV`, and
+`ModernGL`; `PyTorch` and `torchvision` provide the optional MiDaS depth model.
+No generative AI or semantic AI service is used. Motion detection remains
+classical OpenCV processing.
 
 ## Direct Comparison Table
 
@@ -21,6 +22,7 @@ motion detection with `createBackgroundSubtractorMOG2`.
 | Panda3D | `play_video_with_3d_overlay` | Panda3D | `MovieTexture`, 3D model loading, wireframe fallback, keyboard/mouse control |
 | Pygame + PyOpenGL | `play_video_with_pygame_opengl` | Pygame, PyOpenGL, OpenCV | OpenCV video frames, OpenGL background, interactive wireframe sphere |
 | OpenCV + ModernGL | `play_video_with_opencv_moderngl` | OpenCV, ModernGL, ModernGL Window | OpenCV video frames, classical motion rectangles, ModernGL textured output |
+| OpenCV + PyTorch + ModernGL | `play_video_with_opencv_moderngl(..., depth_enabled=True)` | OpenCV, PyTorch, torchvision, ModernGL | MiDaS relative-depth visualization with CUDA/CPU device selection |
 
 The backends are alternatives. An application selects one entry point rather
 than creating three graphics contexts for the same video. This prevents
@@ -36,7 +38,10 @@ Panda3D, Pygame, and ModernGL from competing for one native window.
   overlay drawing; imported 3D file parsing is intentionally not automatic.
 - **OpenCV + ModernGL** is the computer-vision route. OpenCV reads frames and
   performs classical motion detection, while ModernGL uploads and displays
-  the processed frame on the GPU. It does not claim AI-based recognition.
+  the processed frame on the GPU. It does not claim semantic recognition.
+- **PyTorch depth** is an opt-in enhancement to that route. MiDaS estimates
+  relative depth per frame; a CUDA GPU is recommended, while CPU inference is
+  supported as a slower fallback.
 
 ## Selection Guide
 

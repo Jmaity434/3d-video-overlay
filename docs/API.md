@@ -197,19 +197,56 @@ play_video_with_pygame_opengl("assets/demo.mp4")
 
 ```python
 class OpenCVModernGLEngine:
-    def __init__(self, video_path: str, width: int = 1280, height: int = 720): ...
+    def __init__(self, video_path: str, width: int = 1280, height: int = 720,
+                 depth_enabled: bool = False, depth_model: str = "MiDaS_small",
+                 device: Optional[str] = None): ...
     def run(self) -> None: ...
 ```
 
 This backend uses OpenCV to read frames and detect large moving regions with
 classical background subtraction. ModernGL uploads and displays the processed
-frames. `moderngl-window` provides the native window integration.
+frames. When `depth_enabled=True`, PyTorch runs the selected MiDaS model and a
+colored relative-depth visualization is blended into each frame.
 
 ```python
 from video3doverlay import play_video_with_opencv_moderngl
 
-play_video_with_opencv_moderngl("assets/demo.mp4")
+play_video_with_opencv_moderngl(
+    "assets/demo.mp4", depth_enabled=True, device="cuda"
+)
 ```
+
+### `DepthEstimator`
+
+```python
+class DepthEstimator:
+    def __init__(self, model_type: str = "MiDaS_small",
+                 device: Optional[str] = None): ...
+    def estimate(self, frame_bgr: Any) -> Any: ...
+```
+
+`DepthEstimator` lazily loads MiDaS through PyTorch Hub. `device=None` selects
+CUDA when available and otherwise CPU. `estimate()` accepts an OpenCV BGR
+frame and returns a normalized float depth array with matching height and
+width. The values are relative depth scores, not metric distances.
+
+`select_depth_device(device=None)` returns an explicit device unchanged, or
+automatically selects `cuda`/`cpu`; it returns `unavailable` if PyTorch is not
+installed.
 
 Both alternatives raise `RuntimeError` when their dependencies are missing or
 the video cannot be opened. Neither backend uses AI.
+
+### `play_video_with_depth_overlay`
+
+```python
+def play_video_with_depth_overlay(
+    video_path: str,
+    depth_model: str = "MiDaS_small",
+    device: Optional[str] = None,
+) -> None: ...
+```
+
+This convenience function is equivalent to the OpenCV + ModernGL backend with
+`depth_enabled=True`. It loads MiDaS through PyTorch Hub and uses CUDA when
+available unless `device` is explicitly set.

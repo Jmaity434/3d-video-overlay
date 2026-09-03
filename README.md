@@ -54,6 +54,8 @@ Detailed product and engineering documentation is available in [`docs/`](docs/RE
 - OpenCV 4.8.0 or newer and ModernGL 5.8.0 or newer for the computer-vision
   backend.
 - ModernGL Window 2.4.0 or newer for the ModernGL native window integration.
+- PyTorch 2.0.0 or newer and torchvision 0.15.0 or newer for depth estimation.
+- GPU is recommended for real-time depth inference; CPU fallback is supported.
 - A display-capable environment supported by Panda3D. A normal desktop
   session is recommended; the library does not configure an off-screen or
   headless renderer.
@@ -180,10 +182,40 @@ from video3doverlay import play_video_with_opencv_moderngl
 play_video_with_opencv_moderngl("assets/demo.mp4")
 ```
 
+OpenCV + PyTorch depth + ModernGL:
+
+```python
+from video3doverlay import play_video_with_opencv_moderngl
+
+play_video_with_opencv_moderngl(
+  "assets/demo.mp4",
+  depth_enabled=True,
+  depth_model="MiDaS_small",
+  device="cuda",  # Use "cpu" when CUDA is unavailable.
+)
+```
+
+On the first depth-enabled run, PyTorch Hub downloads and caches the MiDaS
+model weights. A network connection is therefore required once unless the
+weights are already cached. Omit `device` to select CUDA automatically when
+available, otherwise CPU is used. The output is relative depth, not measured
+distance in meters.
+
 The Pygame backend uses OpenCV for frames, PyOpenGL for rendering, and draws
 an interactive wireframe sphere. The ModernGL backend uses OpenCV for frames
 and classical motion detection, then displays the processed frame through
 ModernGL. No AI or model-file parser is included in either alternative.
+
+For the advanced depth mode, use the dedicated convenience function:
+
+```python
+from video3doverlay import play_video_with_depth_overlay
+
+play_video_with_depth_overlay("assets/demo.mp4", device="cuda")
+```
+
+Omit `device` for automatic CUDA-or-CPU selection, or pass `device="cpu"` on
+machines without a compatible GPU.
 
 ### Headless Smoke Check
 
@@ -272,6 +304,7 @@ if is_valid_video_path("assets/demo.mp4"):
 │       ├── engine.py     # Panda3D engine and runtime controls
 │       ├── pygame_backend.py  # Pygame + PyOpenGL backend
 │       ├── opencv_backend.py  # OpenCV + ModernGL backend
+│       ├── depth.py        # PyTorch MiDaS depth estimator
 │       └── utils.py      # Video path validation
 ├── tests/
 │   └── test_engine.py    # Headless validation and API tests
@@ -310,6 +343,8 @@ Python 3.8 through 3.12 for pushes to `main` and pull requests.
   by the installed Panda3D build.
 - Video playback and audio depend on Panda3D's available movie and audio
   backends on the target platform.
+- Depth estimation depends on PyTorch model weights and is substantially faster
+  on a compatible CUDA GPU; CPU inference may not be real time.
 - The current public API runs one Panda3D application loop per invocation.
 
 ## License

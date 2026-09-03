@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from video3doverlay.utils import is_valid_video_path, validate_video_path
+from video3doverlay.depth import select_depth_device
 
 
 def test_validate_video_path_accepts_supported_existing_file(tmp_path: Path) -> None:
@@ -31,3 +32,7 @@ def test_public_version() -> None:
     import video3doverlay
 
     assert video3doverlay.__version__ == "0.1.0"
+
+
+def test_depth_device_honors_explicit_selection() -> None:
+    assert select_depth_device("cpu") == "cpu"

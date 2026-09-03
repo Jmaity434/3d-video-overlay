@@ -60,6 +60,12 @@ Uses OpenCV for video acquisition and classical motion detection, then
 ModernGL for GPU texture upload and presentation. `moderngl-window` supplies
 the native window integration required by ModernGL.
 
+### `depth.py`
+
+Loads MiDaS lazily through PyTorch Hub, selects CUDA or CPU, runs inference on
+OpenCV RGB frames, and returns normalized relative-depth arrays. It is a
+classical model-inference component, not a generative AI integration.
+
 ## 3. Scene Graph Design
 
 The background and overlay use separate Panda3D scene roots:

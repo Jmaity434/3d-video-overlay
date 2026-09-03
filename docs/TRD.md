@@ -11,7 +11,7 @@ engine and Hatchling as the build backend.
 | Area | Requirement |
 | --- | --- |
 | Python | `>=3.8` |
-| Graphics | `panda3d>=1.10.14`, `pygame>=2.5.0`, `PyOpenGL>=3.1.7`, `moderngl>=5.8.0` |
+| Graphics and ML runtime | `panda3d>=1.10.14`, `pygame>=2.5.0`, `PyOpenGL>=3.1.7`, `moderngl>=5.8.0`, `torch>=2.0.0`, `torchvision>=0.15.0` |
 | Display | A Panda3D-supported display-capable environment |
 | Input | Panda3D event messenger and mouse watcher |
 | Media and CV | `opencv-python>=4.8.0`; local `.mp4`, `.avi`, or `.mkv` file |
@@ -101,6 +101,11 @@ The largest contour above the area threshold is mapped from normalized frame
 coordinates to overlay X/Z coordinates, and its width determines a bounded
 overlay scale. This is intentionally a simple motion heuristic rather than
 camera calibration or AI-based object recognition.
+
+The depth pipeline lazily loads MiDaS through PyTorch Hub, selects CUDA when
+available unless a device is supplied, and normalizes each prediction to
+`[0, 1]`. It is relative depth and cannot provide metric distance without
+calibration. Model weights may need to be downloaded and cached on first use.
 
 ## 8. Packaging Requirements
 
